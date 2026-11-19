@@ -76,8 +76,23 @@ src/
 ```js
 import api from './api'
 
-const ranchos = await api.get('/ranchos')
-await api.post('/login', { correo, contrasena })
+// Comprobar que la API responde (sin autenticación)
+await api.get('/health')
+
+// Iniciar sesión: POST /auth/login con { username, password }
+// y devuelve { access_token, ... }
+const { access_token } = await api.post('/auth/login', { username, password })
+
+// Las demás rutas piden el header Authorization: Bearer <access_token>
+const ranchos = await api.get('/ranchos', {
+  headers: { Authorization: `Bearer ${access_token}` },
+})
 ```
 
 Si la API responde con error, `api` lanza un `ApiError` con `status` y `data`.
+
+### Probar la conexión con la API
+
+En la página `/login` hay un botón **Probar conexión** que llama a `GET /health`
+y muestra "Conectado a la API" o el error. Con la API corriendo y `VITE_API_URL`
+bien configurado, ese es el primer paso para comprobar que todo funciona.
